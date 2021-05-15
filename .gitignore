@@ -1,0 +1,10 @@
+*
+!*/
+
+!.gitignore
+!CMakeLists.txt
+!*.cpp
+!*.c
+!*.py
+
+cmake-build-*/

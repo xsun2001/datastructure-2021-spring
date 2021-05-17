@@ -1,199 +1,118 @@
-#include <cstdlib>
-#include <cstring>
+#include <cstdio>
 #include <functional>
-#include <iostream>
-
-// --- ChunkedVector ---
-
-const int CHUNK_SIZE = 10, CHUNK_COUNT = 1000;
 
 template <typename T>
-struct Chunk
+struct LLNode
 {
-	T data[CHUNK_SIZE + 1];
-	Chunk<T>* next;
-	int size;
-	Chunk() : next( nullptr ), size( 0 ) { memset( data, 0, sizeof( data ) ); }
-	~Chunk()
-	{
-		if ( next )
-		{
-			delete next;
-		}
-	}
-	T operator[]( int idx ) { return data[idx]; }
-	void insert( int idx, T& ele )
-	{
-		// std::cout << "chunk insert " << idx << " " << ele << std::endl;
-		// Ignore invalid operation
-		if ( idx != size )
-		{
-			memmove( &data[idx + 1], &data[idx], sizeof( T ) * ( size - idx ) );
-		}
-		data[idx] = ele;
-		++size;
-	}
-	T remove( int idx )
-	{
-		T ele = data[idx];
-		if ( idx < size - 1 )
-		{
-			memmove( &data[idx], &data[idx + 1], sizeof( T ) * ( size - idx - 1 ) );
-		}
-		--size;
-		memset( &data[size], 0, sizeof( T ) );
-		return ele;
-	}
-	void push_back( T& ele ) { insert( size, ele ); }
-	void for_each( std::function<void( int, int )> op, int size_offset )
-	{
-		// std::cout << "Low foreach" << std::endl;
-		for ( int i = 0; i < size; i++ )
-		{
-			op( data[i], size_offset + i );
-		}
-	}
+	T data;
+	LLNode* nxt;
+	explicit LLNode( T data ) : data( data ), nxt( nullptr ) {}
 };
 
 template <typename T>
-class ChunkedVector
+class LinkedList
 {
+private:
+	LLNode<T>* head;
+	int size;
+
 public:
-	ChunkedVector() : size( 0 ), chunk_count( 0 ), chunks( nullptr ) {}
-	~ChunkedVector()
+	LinkedList() : head( nullptr ), size( 0 ) {}
+	~LinkedList()
 	{
-		if ( chunks )
+		while ( head )
 		{
-			delete chunks;
+			auto nxt = head->nxt;
+			delete head;
+			head = nxt;
+		}
+	}
+	void push_back( T t )
+	{
+		auto newNode = new LLNode<T>( t );
+		if ( size == 0 )
+		{
+			head = newNode;
+		}
+		else
+		{
+			auto node = head;
+			while ( node->nxt != nullptr )
+			{
+				node = node->nxt;
+			}
+			node->nxt = newNode;
+		}
+		++size;
+	}
+	void insert( int idx, T t )
+	{
+		auto newNode = new LLNode<T>( t );
+		if ( idx == 0 )
+		{
+			newNode->nxt = head;
+			head = newNode;
+		}
+		else
+		{
+			auto node = head;
+			for ( int i = 1; i < idx; i++ )
+			{
+				node = node->nxt;
+			}
+			newNode->nxt = node->nxt;
+			node->nxt = newNode;
+		}
+		++size;
+	}
+	void remove( int idx )
+	{
+		if ( idx == 0 )
+		{
+			auto toRemove = head;
+			head = head->nxt;
+			delete toRemove;
+		}
+		else
+		{
+			auto node = head;
+			for ( int i = 1; i < idx; i++ )
+			{
+				node = node->nxt;
+			}
+			auto toRemove = node->nxt;
+			node->nxt = node->nxt->nxt;
+			delete toRemove;
+		}
+		--size;
+	}
+	void for_each( std::function<void( T, int )> op )
+	{
+		auto node = head;
+		for ( int i = 0; i < size; i++ )
+		{
+			op( node->data, i );
+			node = node->nxt;
 		}
 	}
 	int getSize() { return size; }
-	void partition()
+	T operator[]( int idx )
 	{
-		static T buffer[CHUNK_COUNT * CHUNK_SIZE];
-		Chunk<T>*c = chunks, *pc = nullptr;
-		for ( int i = 0, idx = 0; i < chunk_count && idx < size; i++ )
+		auto node = head;
+		for ( int i = 0; i < idx; i++ )
 		{
-			memmove( buffer + idx, c->data, sizeof( T ) * c->size );
-			idx += c->size;
-			c = c->next;
+			node = node->nxt;
 		}
-		int i = 0, idx = 0;
-		c = chunks;
-		while ( idx < size )
-		{
-			int s = std::min( size - idx, CHUNK_SIZE );
-			memmove( c->data, buffer + idx, sizeof( T ) * s );
-			c->size = s;
-			idx += s;
-			++i;
-			pc = c;
-			c = c->next;
-			if ( c == nullptr )
-			{
-				pc->next = c = new Chunk<int>();
-			}
-		}
-		chunk_count = i;
-		while ( c )
-		{
-			c->size = 0;
-			c = c->next;
-		}
+		return node->data;
 	}
-	void insert( int idx, T& ele )
-	{
-		// std::cout << "insert " << idx << " " << ele << std::endl;
-		if ( chunks == nullptr )
-		{
-			chunks = new Chunk<T>();
-		}
-		Chunk<T>*c = chunks, *c1 = chunks;
-		int i = 0;
-		for ( ; idx > c->size && i < chunk_count; i++ )
-		{
-			idx -= c->size;
-			c1 = c;
-			c = c->next;
-		}
-		if ( i == chunk_count )
-		{
-			++chunk_count;
-		}
-		if ( c == nullptr )
-		{
-			c1->next = c = new Chunk<T>();
-		}
-		c->insert( idx, ele );
-		++size;
-		if ( c->size > CHUNK_SIZE )
-		{
-			partition();
-		}
-	}
-	void push_back( T& ele ) { insert( size, ele ); }
-	T& operator[]( int idx )
-	{
-		Chunk<T>* c = chunks;
-		while ( idx >= c->size )
-		{
-			idx -= c->size;
-			c = c->next;
-		}
-		return c->data[idx];
-	}
-	T remove( int idx )
-	{
-		Chunk<T>* c = chunks;
-		while ( idx >= c->size )
-		{
-			idx -= c->size;
-			c = c->next;
-		}
-		T ele = c->remove( idx );
-		--size;
-		if ( c->size == 0 )
-		{
-			partition();
-		}
-		return ele;
-	}
-	void for_each( std::function<void( int, int )> op )
-	{
-		// std::cout << "Top foreach" << std::endl;
-		int size_offset = 0, i = 0;
-		Chunk<T>* c = chunks;
-		while ( i < chunk_count )
-		{
-			c->for_each( op, size_offset );
-			size_offset += c->size;
-			c = c->next;
-			++i;
-		}
-	}
-
-private:
-	int size, chunk_count;
-	Chunk<T>* chunks;
 };
-
-// int main()
-// {
-// 	ChunkedVector<int> cv;
-// 	for ( int i = 1; i <= 22; i++ )
-// 		cv.insert( 0, i );
-// 	cv.for_each( []( int a, int b ) { std::cout << a << ","; } );
-// 	std::cout << std::endl;
-// }
-
-// --------------
 
 const int NODE_COUNT = 1000006;
 // MWT: Multi-Way Tree
 struct MWTNode
 {
-	int parent, size;
-	ChunkedVector<int> children;
+	int parent, size, highestChild, height;
+	LinkedList<int> children;
 } tree[NODE_COUNT];
 
 // parentNode.children[childIndex] = node
@@ -202,21 +121,63 @@ void findNode( int& node, int& parentNode, int& childIndex )
 	parentNode = node = 1;
 	int l, k;
 	bool good = true;
-	std::cin >> l;
+	scanf( "%d", &l );
+	if ( l <= 0 )
+	{
+		return;
+	}
 	while ( l-- )
 	{
-		std::cin >> k;
-		if ( k >= tree[node].children.getSize() )
-		{
-			good = false;
-		}
+		scanf( "%d", &k );
 		if ( !good )
 		{
+			continue;
+		}
+		if ( k < 0 || k >= tree[node].children.getSize() )
+		{
+			good = false;
 			continue;
 		}
 		parentNode = node;
 		node = tree[node].children[k];
 		childIndex = k;
+	}
+}
+
+void updateSize( int node, int deltaSize )
+{
+	while ( node )
+	{
+		tree[node].size += deltaSize;
+		node = tree[node].parent;
+	}
+}
+
+void updateHeight( int node )
+{
+	while ( node )
+	{
+		int lastHeight = tree[node].height;
+		tree[node].height = tree[node].highestChild = 0;
+		if ( tree[node].children.getSize() > 0 )
+		{
+			tree[node].children.for_each(
+				[=]( int n, int idx )
+				{
+					if ( tree[n].height > tree[node].height )
+					{
+						tree[node].height = tree[n].height;
+						tree[node].highestChild = n;
+					}
+				} );
+			++tree[node].height;
+		}
+		int parent = tree[node].parent;
+		if ( parent == 0 || tree[parent].highestChild != node || lastHeight == tree[node].height )
+		{
+			return;
+		}
+		node = parent;
 	}
 }
 
@@ -232,34 +193,31 @@ void moveSubtree()
 	findNode( sourceNode, snParentNode, snChildIndex );
 	tree[snParentNode].children.remove( snChildIndex );
 	deltaSize = tree[sourceNode].size;
-	while ( snParentNode )
+	updateSize( snParentNode, -deltaSize );
+	if ( sourceNode == tree[snParentNode].highestChild )
 	{
-		tree[snParentNode].size -= deltaSize;
-		snParentNode = tree[snParentNode].parent;
+		updateHeight( snParentNode );
 	}
 
 	// Insert to target node
 	findNode( targetNode, tnParentNode, tnChildIndex );
-	std::cin >> rank;
+	scanf( "%d", &rank );
 	tree[targetNode].children.insert( rank, sourceNode );
 	tree[sourceNode].parent = targetNode;
-	while ( targetNode )
+	updateSize( targetNode, deltaSize );
+	if ( tree[sourceNode].height + 1 > tree[targetNode].height )
 	{
-		tree[targetNode].size += deltaSize;
-		targetNode = tree[targetNode].parent;
+		tree[targetNode].highestChild = sourceNode;
+		tree[targetNode].height = tree[sourceNode].height + 1;
+		updateHeight( tree[targetNode].parent );
 	}
 }
 
 int queryHeight()
 {
-	int node, pn, ci, ans = 0;
+	int node, pn, ci;
 	findNode( node, pn, ci );
-	while ( node )
-	{
-		++ans;
-		node = tree[node].parent;
-	}
-	return ans;
+	return tree[node].height;
 }
 
 int querySize()
@@ -276,14 +234,29 @@ int queryNode()
 	return node;
 }
 
-int initSize( int node )
+void initTree( int node )
 {
-	// std::cout << "initSize " << node << std::endl;
-	int size = 1;
-	tree[node].children.for_each( [&]( int n, int idx ) { size += initSize( n ); } );
-	tree[node].size = size;
+	if ( tree[node].children.getSize() == 0 )
+	{
+		tree[node].size = 1;
+		tree[node].height = 0;
+		return;
+	}
+	// std::cout << "initTree " << node << std::endl;
+	tree[node].children.for_each(
+		[=]( int n, int idx )
+		{
+			initTree( n );
+			tree[node].size += tree[n].size;
+			if ( tree[n].height > tree[node].height )
+			{
+				tree[node].highestChild = n;
+				tree[node].height = tree[n].height;
+			}
+		} );
+	++tree[node].size;
+	++tree[node].height;
 	// std::cout << "size " << node << " " << size << std::endl;
-	return size;
 }
 
 void readTree( int n )
@@ -291,50 +264,50 @@ void readTree( int n )
 	for ( int i = 1; i <= n; i++ )
 	{
 		int k, l;
-		std::cin >> k;
+		scanf( "%d", &k );
 		for ( int j = 0; j < k; j++ )
 		{
-			std::cin >> l;
+			scanf( "%d", &l );
 			tree[i].children.push_back( l );
 			tree[l].parent = i;
 		}
 	}
-	initSize( 1 );
+	initTree( 1 );
 }
 
 void printTree( int node, int depth )
 {
 	for ( int i = 0; i < depth; i++ )
-		std::cout << "  ";
-	std::cout << "Node " << node << " Depth " << depth << " Size " << tree[node].size << std::endl;
+		printf( "  " );
+	printf( "[%d, %d, %d, %d, %d]\n", node, depth, tree[node].size, tree[node].height, tree[node].highestChild );
 	tree[node].children.for_each( [=]( int n, int i ) { printTree( n, depth + 1 ); } );
 }
 
 int main()
 {
 	int n, m, op;
-	std::cin >> n >> m;
+	scanf( "%d%d", &n, &m );
 	readTree( n );
 	while ( m-- )
 	{
-		std::cin >> op;
+		scanf( "%d", &op );
 		switch ( op )
 		{
 		case 0:
 			moveSubtree();
 			break;
 		case 1:
-			std::cout << queryHeight() << std::endl;
+			printf( "%d\n", queryHeight() );
 			break;
 		case 2:
-			std::cout << querySize() << std::endl;
+			printf( "%d\n", querySize() );
 			break;
-			// case 3:
-			// 	std::cout << queryNode() << std::endl;
-			// 	break;
-			// case 4:
-			// 	printTree( 1, 0 );
-			// 	break;
+		case 3:
+			printf( "%d\n", queryNode() );
+			break;
+		case 4:
+			printTree( 1, 0 );
+			break;
 		}
 	}
 }

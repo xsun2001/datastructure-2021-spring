@@ -315,7 +315,7 @@ int queryNode()
 	return node;
 }
 
-int initSize( int node )
+int initTree( int node )
 {
 	// std::cout << "initSize " << node << std::endl;
 	int size = 1;

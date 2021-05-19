@@ -7,3 +7,6 @@ add_executable(lab2-framework framework/main.cpp)
 target_link_libraries(lab2-framework lab2-hashtable)
 
 add_executable(data-generator data-generator.cpp)
+
+add_executable(lab2-main main.cpp djb2-hash.cpp)
+target_link_libraries(lab2-main lab2-hashtable)

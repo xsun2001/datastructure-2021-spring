@@ -155,6 +155,8 @@ int main( int argc, char** argv )
 	{
 		RandomReal r( 0, 1 );
 		double limit = (double) insertion_count / ( insertion_count + query_count );
+		newInsertion();
+		--insertion_count;
 		while ( insertion_count > 0 || query_count > 0 )
 		{
 			if ( query_count == 0 || r() <= limit )

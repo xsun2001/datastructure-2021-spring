@@ -47,13 +47,13 @@ unsigned long djb2_hash( String& str )
 	return hash;
 }
 
-int djb2_ascii_hashing_strategy::operator()( char* str, int N ) override
+int djb2_ascii_hashing_strategy::operator()( char* str, int N )
 {
 	AsciiString string( str );
 	return (int) ( djb2_hash( string ) % (unsigned long) N );
 }
 
-int djb2_utf8_hashing_strategy::operator()( char* str, int N ) override
+int djb2_utf8_hashing_strategy::operator()( char* str, int N )
 {
 	Utf8String string( str );
 	return (int) ( djb2_hash( string ) % (unsigned long) N );

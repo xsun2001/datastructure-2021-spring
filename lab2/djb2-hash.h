@@ -2,10 +2,10 @@
 
 struct String
 {
-	explicit String( char* str ) : data( nullptr ), current_index( 0 )
+	explicit String( char* str ) : current_index( 0 ), data( nullptr )
 	{
 		int len = strlen( str );
-		data = new char[len];
+		data = new char[len + 1];
 		strcpy( data, str );
 	}
 	~String() { delete[] data; }

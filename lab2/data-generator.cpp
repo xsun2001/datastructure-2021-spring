@@ -96,6 +96,7 @@ void newInsertion()
 	auto& record = getUnselected();
 	input << "0 " << std::get<0>( record ) << " " << std::get<1>( record ) << std::endl;
 	selected.push_back( record );
+	std::get<2>( record ) = true;
 }
 
 void newInsertedQuery()

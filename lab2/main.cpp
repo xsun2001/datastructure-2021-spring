@@ -56,7 +56,7 @@ int main( int argc, char** argv )
 		collision = new linear_probe();
 	}
 
-	hashtable table( 2000, hash, collision );
+	hashtable table( TABLE_SIZE, hash, collision );
 	while ( true )
 	{
 		scanf( "%d", &type );

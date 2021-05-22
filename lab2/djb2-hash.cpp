@@ -1,15 +1,15 @@
 #include "djb2-hash.h"
 
-int AsciiString::next()
+unsigned int AsciiString::next()
 {
-	int c = data[current_index];
+	unsigned char c = data[current_index];
 	++current_index;
 	return c;
 }
 
-int Utf8String::next()
+unsigned int Utf8String::next()
 {
-	int c1 = data[current_index];
+	unsigned int c1 = (unsigned char) data[current_index];
 	if ( ( c1 & 0b10000000 ) == 0 )
 	{
 		current_index += 1;
@@ -17,7 +17,7 @@ int Utf8String::next()
 	}
 	else
 	{
-		int c2 = data[current_index + 1];
+		unsigned int c2 = (unsigned char) data[current_index + 1];
 		if ( ( c1 >> 5 ) == 0b110 && ( c2 >> 6 ) == 0b10 )
 		{
 			current_index += 2;
@@ -25,11 +25,11 @@ int Utf8String::next()
 		}
 		else
 		{
-			int c3 = data[current_index + 1];
+			unsigned int c3 = (unsigned char) data[current_index + 2];
 			if ( ( c1 >> 4 ) == 0b1110 && ( c2 >> 6 ) == 0b10 && ( c3 >> 6 ) == 0b10 )
 			{
 				current_index += 3;
-				return ( ( ( ( c1 & 0b1111 ) << 6 ) | ( c2 & 0b111111 ) ) << 6 ) | ( c3 & 0b111111 );
+				return ( ( c1 & 0b1111 ) << 12 ) | ( ( c2 & 0b111111 ) << 6 ) | ( c3 & 0b111111 );
 			}
 		}
 	}

@@ -9,7 +9,7 @@ struct String
 		strcpy( data, str );
 	}
 	~String() { delete[] data; }
-	virtual int next() = 0;
+	virtual unsigned int next() = 0;
 
 protected:
 	int current_index;
@@ -19,13 +19,13 @@ protected:
 struct AsciiString : public String
 {
 	explicit AsciiString( char* str ) : String( str ) {}
-	int next() override;
+	unsigned int next() override;
 };
 
 struct Utf8String : public String
 {
 	explicit Utf8String( char* str ) : String( str ) {}
-	int next() override;
+	unsigned int next() override;
 };
 
 struct djb2_ascii_hashing_strategy : public hashing_strategy

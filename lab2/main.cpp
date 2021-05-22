@@ -74,5 +74,7 @@ int main( int argc, char** argv )
 		else
 			break;
 	}
+
+	printf( "%llu\n", table.collision_counts );
 	return 0;
 }

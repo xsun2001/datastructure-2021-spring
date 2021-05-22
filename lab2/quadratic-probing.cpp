@@ -19,6 +19,6 @@ int quadratic_probing::operator()( hash_entry* Table, int table_size, int last_c
 		last_direction = -1;
 	}
 	last_choice += last_direction * last_addition * last_addition;
-	last_index = last_choice % table_size;
+	last_index = ( last_choice % table_size + table_size ) % table_size;
 	return last_index;
 }

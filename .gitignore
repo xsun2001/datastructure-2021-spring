@@ -3,9 +3,12 @@
 
 !.gitignore
 !CMakeLists.txt
+
 !*.h
 !*.cpp
 !*.c
 !*.py
+!*.sh
+!*.md
 
 cmake-build-*/

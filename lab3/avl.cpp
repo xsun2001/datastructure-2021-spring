@@ -5,8 +5,8 @@ void AvlTree::rightRotate( Node*& n )
 	auto m = n->left;
 	n->left = m->right;
 	m->right = n;
-	updateHeightAndSize( n );
-	updateHeightAndSize( m );
+	updateHeight( n );
+	updateHeight( m );
 	n = m;
 }
 
@@ -15,8 +15,8 @@ void AvlTree::leftRotate( Node*& n )
 	auto m = n->right;
 	n->right = m->left;
 	m->left = n;
-	updateHeightAndSize( n );
-	updateHeightAndSize( m );
+	updateHeight( n );
+	updateHeight( m );
 	n = m;
 }
 
@@ -32,15 +32,9 @@ void AvlTree::leftRightRotate( Node*& n )
 	rightRotate( n );
 }
 
-int AvlTree::getSize( Node* n ) { return n == nullptr ? 0 : n->size; }
-
 int AvlTree::getHeight( Node* n ) { return n == nullptr ? -1 : n->height; }
 
-void AvlTree::updateHeightAndSize( Node* n )
-{
-	n->height = 1 + max( getHeight( n->left ), getHeight( n->right ) );
-	n->size = 1 + max( getSize( n->left ), getSize( n->right ) );
-}
+void AvlTree::updateHeight( Node* n ) { n->height = 1 + max( getHeight( n->left ), getHeight( n->right ) ); }
 
 void AvlTree::balance( Node*& n )
 {
@@ -71,7 +65,7 @@ void AvlTree::balance( Node*& n )
 			rightLeftRotate( n );
 		}
 	}
-	updateHeightAndSize( n );
+	updateHeight( n );
 }
 
 void AvlTree::insert( Node*& n, int element )

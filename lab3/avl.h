@@ -6,9 +6,9 @@ class AvlTree : public BinarySearchTree
 private:
 	struct Node
 	{
-		int data, height, size;
+		int data, height;
 		Node *left, *right;
-		Node() : data( 0 ), left( nullptr ), right( nullptr ), height( 0 ), size( 1 ) {}
+		Node() : data( 0 ), left( nullptr ), right( nullptr ), height( 0 ) {}
 	};
 	Node* root = nullptr;
 	// Single Rotation
@@ -17,10 +17,9 @@ private:
 	// Double Rotation
 	void rightLeftRotate( Node*& n );
 	void leftRightRotate( Node*& n );
-	// Size & Height Helper Functions
-	int getSize( Node* n );
+	// Height Helper Functions
 	int getHeight( Node* n );
-	void updateHeightAndSize( Node* n );
+	void updateHeight( Node* n );
 	// Balance
 	void balance( Node*& n );
 	// Internal Functions

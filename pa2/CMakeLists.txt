@@ -1,0 +1,5 @@
+add_executable(pa2-1 1.cpp)
+add_executable(pa2-1-test 1test.cpp)
+add_executable(pa2-2 2.cpp)
+add_executable(pa2-4-1 4-1.cpp)
+add_executable(pa2-4-2 4-2.cpp)

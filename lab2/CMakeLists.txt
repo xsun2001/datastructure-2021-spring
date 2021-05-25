@@ -1,5 +1,3 @@
-set(CMAKE_CXX_STANDARD 14)
-
 add_library(lab2-hashtable framework/hashtable.cpp)
 target_include_directories(lab2-hashtable PUBLIC framework/hashtable.h)
 

@@ -1,6 +1,6 @@
 #include "avl.h"
 
-void AvlTree::rightRotate( AvlNode*& n )
+void AvlTree::rightRotate( Node*& n )
 {
 	auto m = n->left;
 	n->left = m->right;
@@ -10,7 +10,7 @@ void AvlTree::rightRotate( AvlNode*& n )
 	n = m;
 }
 
-void AvlTree::leftRotate( AvlNode*& n )
+void AvlTree::leftRotate( Node*& n )
 {
 	auto m = n->right;
 	n->right = m->left;
@@ -20,29 +20,29 @@ void AvlTree::leftRotate( AvlNode*& n )
 	n = m;
 }
 
-void AvlTree::rightLeftRotate( AvlNode*& n )
+void AvlTree::rightLeftRotate( Node*& n )
 {
 	rightRotate( n->right );
 	leftRotate( n );
 }
 
-void AvlTree::leftRightRotate( AvlNode*& n )
+void AvlTree::leftRightRotate( Node*& n )
 {
 	leftRotate( n->left );
 	rightRotate( n );
 }
 
-int AvlTree::getSize( AvlNode* n ) { return n == nullptr ? 0 : n->size; }
+int AvlTree::getSize( Node* n ) { return n == nullptr ? 0 : n->size; }
 
-int AvlTree::getHeight( AvlNode* n ) { return n == nullptr ? -1 : n->height; }
+int AvlTree::getHeight( Node* n ) { return n == nullptr ? -1 : n->height; }
 
-void AvlTree::updateHeightAndSize( AvlNode* n )
+void AvlTree::updateHeightAndSize( Node* n )
 {
 	n->height = 1 + max( getHeight( n->left ), getHeight( n->right ) );
 	n->size = 1 + max( getSize( n->left ), getSize( n->right ) );
 }
 
-void AvlTree::balance( AvlNode*& n )
+void AvlTree::balance( Node*& n )
 {
 	if ( n == nullptr )
 	{
@@ -74,11 +74,11 @@ void AvlTree::balance( AvlNode*& n )
 	updateHeightAndSize( n );
 }
 
-void AvlTree::insert( AvlNode*& n, int element )
+void AvlTree::insert( Node*& n, int element )
 {
 	if ( n == nullptr )
 	{
-		n = new AvlNode();
+		n = new Node();
 		n->data = element;
 		return;
 	}
@@ -93,7 +93,7 @@ void AvlTree::insert( AvlNode*& n, int element )
 	balance( n );
 }
 
-void AvlTree::remove( AvlNode*& n, int element )
+void AvlTree::remove( Node*& n, int element )
 {
 	if ( n == nullptr )
 	{
@@ -121,9 +121,9 @@ void AvlTree::remove( AvlNode*& n, int element )
 	balance( n );
 }
 
-AvlNode* AvlTree::findMin( AvlNode* n ) { return ( n == nullptr || n->left == nullptr ) ? n : findMin( n->left ); }
+AvlTree::Node* AvlTree::findMin( Node* n ) { return ( n == nullptr || n->left == nullptr ) ? n : findMin( n->left ); }
 
-bool AvlTree::find( AvlNode*& n, int element, int& found )
+bool AvlTree::find( Node*& n, int element, int& found )
 {
 	if ( n == nullptr )
 	{

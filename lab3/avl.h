@@ -1,34 +1,33 @@
 #pragma once
 #include "bst.h"
 
-struct AvlNode
-{
-	int data, height, size;
-	AvlNode *left, *right;
-	AvlNode() : data( 0 ), left( nullptr ), right( nullptr ), height( 0 ), size( 1 ) {}
-};
-
 class AvlTree : public BinarySearchTree
 {
 private:
-	AvlNode* root = nullptr;
+	struct Node
+	{
+		int data, height, size;
+		Node *left, *right;
+		Node() : data( 0 ), left( nullptr ), right( nullptr ), height( 0 ), size( 1 ) {}
+	};
+	Node* root = nullptr;
 	// Single Rotation
-	void rightRotate( AvlNode*& n );
-	void leftRotate( AvlNode*& n );
+	void rightRotate( Node*& n );
+	void leftRotate( Node*& n );
 	// Double Rotation
-	void rightLeftRotate( AvlNode*& n );
-	void leftRightRotate( AvlNode*& n );
+	void rightLeftRotate( Node*& n );
+	void leftRightRotate( Node*& n );
 	// Size & Height Helper Functions
-	int getSize( AvlNode* n );
-	int getHeight( AvlNode* n );
-	void updateHeightAndSize( AvlNode* n );
+	int getSize( Node* n );
+	int getHeight( Node* n );
+	void updateHeightAndSize( Node* n );
 	// Balance
-	void balance( AvlNode*& n );
+	void balance( Node*& n );
 	// Internal Functions
-	void insert( AvlNode*& n, int element );
-	void remove( AvlNode*& n, int element );
-	AvlNode* findMin( AvlNode* n );
-	bool find( AvlNode*& n, int element, int& found );
+	void insert( Node*& n, int element );
+	void remove( Node*& n, int element );
+	Node* findMin( Node* n );
+	bool find( Node*& n, int element, int& found );
 
 public:
 	void insert( int element ) override;

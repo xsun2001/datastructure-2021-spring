@@ -2,13 +2,14 @@
 
 #include "avl.h"
 #include "bst.h"
+#include "rbt.h"
 
 int n, x, f;
 char op[10];
 
 int main()
 {
-	BinarySearchTree* tree = new AvlTree();
+	BinarySearchTree* tree = new RedBlackTree();
 	scanf( "%d", &n );
 	while ( n-- )
 	{

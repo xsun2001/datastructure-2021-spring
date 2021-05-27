@@ -1,4 +1,5 @@
 #include "avl.h"
+#include <cstdio>
 
 void AvlTree::rightRotate( Node*& n )
 {
@@ -143,3 +144,17 @@ void AvlTree::insert( int element ) { insert( root, element ); }
 void AvlTree::remove( int element ) { remove( root, element ); }
 
 bool AvlTree::find( int element, int& found ) { return find( root, element, found ); }
+
+void AvlTree::print( AvlTree::Node* n, int depth )
+{
+	if ( n != nullptr )
+	{
+		print( n->left, depth + 1 );
+		for ( int i = 0; i < depth; i++ )
+			printf( "  " );
+		printf( "%d\n", n->data );
+		print( n->right, depth + 1 );
+	}
+}
+
+void AvlTree::print() { print( root, 0 ); }

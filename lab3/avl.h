@@ -27,9 +27,11 @@ private:
 	void remove( Node*& n, int element );
 	Node* findMin( Node* n );
 	bool find( Node*& n, int element, int& found );
+	void print( Node* n, int depth );
 
 public:
 	void insert( int element ) override;
 	void remove( int element ) override;
 	bool find( int element, int& found ) override;
+	void print() override;
 };

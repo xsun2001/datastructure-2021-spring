@@ -6,6 +6,7 @@ public:
 	virtual void insert( int element ) = 0;
 	virtual void remove( int element ) = 0;
 	virtual bool find( int element, int& found ) = 0;
+	virtual void print() = 0;
 };
 
 template <typename T>

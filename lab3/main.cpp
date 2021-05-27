@@ -7,9 +7,18 @@
 int n, x, f;
 char op[10];
 
-int main()
+int main( int argc, char** argv )
 {
-	BinarySearchTree* tree = new RedBlackTree();
+	BinarySearchTree* tree;
+	if ( argc > 1 && argv[1][0] == '1' )
+	{
+		tree = new AvlTree();
+	}
+	else
+	{
+		tree = new RedBlackTree();
+	}
+
 	scanf( "%d", &n );
 	while ( n-- )
 	{
@@ -23,8 +32,10 @@ int main()
 			tree->remove( x );
 			break;
 		case 'C':
-			bool found = tree->find( x, f );
-			printf( "%d\n", found ? f : -1 );
+			printf( "%d\n", tree->find( x, f ) ? f : -1 );
+			break;
+		case 'D':
+			tree->print();
 			break;
 		}
 	}

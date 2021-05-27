@@ -1,4 +1,5 @@
 #include "rbt.h"
+#include <cstdio>
 #include <limits>
 RedBlackTree::RedBlackTree()
 	: header( new Node ), nullNode( new Node ), current( nullptr ), p1( nullptr ), p2( nullptr ), p3( nullptr )
@@ -16,15 +17,15 @@ void RedBlackTree::handleReorient( int ele )
 		p2->color = RED;
 		if ( ele < p2->data != ele < p1->data )
 		{
-			p1 = rotate( ele, p2 );
+			p1 = rotateUp( ele, p2 );
 		}
-		current = rotate( ele, p3 );
+		current = rotateUp( ele, p3 );
 		current->color = BLACK;
 	}
 
 	header->right->color = BLACK;
 }
-RedBlackTree::Node* RedBlackTree::rotate( int ele, RedBlackTree::Node* parent )
+RedBlackTree::Node* RedBlackTree::rotateUp( int ele, RedBlackTree::Node* parent )
 {
 	if ( ele < parent->data )
 	{
@@ -34,6 +35,19 @@ RedBlackTree::Node* RedBlackTree::rotate( int ele, RedBlackTree::Node* parent )
 	else
 	{
 		ele < parent->right->data ? rightRotate( parent->right ) : leftRotate( parent->right );
+		return parent->right;
+	}
+}
+RedBlackTree::Node* RedBlackTree::rotateDown( int ele, RedBlackTree::Node* parent )
+{
+	if ( ele < parent->data )
+	{
+		ele < parent->left->data ? leftRotate( parent->left ) : rightRotate( parent->left );
+		return parent->left;
+	}
+	else
+	{
+		ele < parent->right->data ? leftRotate( parent->right ) : rightRotate( parent->right );
 		return parent->right;
 	}
 }
@@ -115,108 +129,152 @@ void RedBlackTree::remove( int x )
 {
 	header->right->color = RED;
 	// c: current, t: sibling, p: parent, g: grandparent
-	Node *c = header->right, *t = header->left, *p = header, *g = header, *toDelete = c->data == x ? c : nullptr;
+	Node *c = header, *t, *p, *g, *toDelete;
+	t = p = g = toDelete = nullptr;
+
 	while ( true )
 	{
+		// c is red
 		if ( c->left == nullNode && c->right == nullNode )
 		{
-			if ( toDelete != nullptr )
-			{
-				toDelete->data = c->data;
-				if ( x < p->data )
-				{
-					p->left = nullNode;
-				}
-				else
-				{
-					p->right = nullNode;
-				}
-				delete c;
-			}
-			header->right->color = BLACK;
-			return;
+			break;
 		}
+
+		// push c down
 
 		g = p;
 		p = c;
-		if ( x < p->data )
+		if ( x < c->data )
 		{
-			c = p->left;
-			t = p->right;
+			t = c->right;
+			c = c->left;
 		}
 		else
 		{
-			c = p->right;
-			t = p->left;
+			t = c->left;
+			c = c->right;
 		}
-		if ( x == c->data )
+		if ( c->data == x )
 		{
 			toDelete = c;
 		}
+
+		// balance
 
 		if ( c->left->color == BLACK && c->right->color == BLACK )
 		{
 			if ( t->left->color == BLACK && t->right->color == BLACK )
 			{
 				// Case 1
-				p->color = BLACK;
 				c->color = t->color = RED;
+				p->color = nullNode->color = BLACK;
 			}
 			else
 			{
-				// Case 2
-				if ( c == p->left && t->left->color == RED )
+
+				if ( c->data < p->data )
 				{
-					rightRotate( p->right );
-				}
-				else if ( c == p->right && t->right->color == RED )
-				{
-					leftRotate( p->left );
+					if ( t->right->color == BLACK )
+					{
+						// Case 3
+						rightRotate( p->right );
+					}
 				}
 				else
 				{
-					t->color = RED;
-					t->left->color = t->right->color = BLACK;
+					if ( t->left->color == BLACK )
+					{
+						// Case 3
+						leftRotate( p->left );
+					}
 				}
-				rotate( t->data, g );
-				c->color = RED;
-				p->color = BLACK;
+				// Case 2
+				Node* subroot = rotateDown( x, g );
+				subroot->color = c->color = RED;
+				subroot->left->color = subroot->right->color = BLACK;
 			}
 		}
 		else
 		{
-			Node *nc, *nt;
-			if ( x < c->data )
+			if ( ( c->left->color == RED && c->right->color == RED ) || ( x < c->data ) == ( c->left->color == RED ) )
 			{
-				nc = c->left;
-				nt = c->right;
-			}
-			else
-			{
-				nc = c->right;
-				nt = c->left;
-			}
-			if ( nc->color == RED )
-			{
-				// Case 3
+				// Case 4
 				g = p;
 				p = c;
-				c = nc;
-				t = nt;
-				if ( x == c->data )
+				if ( x < c->data )
+				{
+					t = c->right;
+					c = c->left;
+				}
+				else
+				{
+					t = c->left;
+					c = c->right;
+				}
+				if ( c->data == x )
 				{
 					toDelete = c;
 				}
 			}
 			else
 			{
-				// Case 4
-				rotate( nt->data, p );
-				rotate( nc->data, nt );
-				c = nt;
+				// Case 5
+				p = rotateDown( x, p );
+				p->color = BLACK;
+				c->color = RED;
 			}
 		}
+
+		// c is still red
+	}
+
+	if ( toDelete != nullptr )
+	{
+		toDelete->data = c->data;
+		Node*& uplink = c->data < p->data ? p->left : p->right;
+		if ( c->data < p->data )
+		{
+			p->left = nullNode;
+		}
+		else
+		{
+			p->right = nullNode;
+		}
+		delete c;
+	}
+
+	nullNode->color = header->right->color = BLACK;
+
+	if ( nullNode->left != nullNode || nullNode->right != nullNode || nullNode->color == RED ||
+		 check( header->right ) == -1 )
+	{
+		printf( "WARNING: %d\n", x );
 	}
 }
 
 bool RedBlackTree::find( int x, int& found ) { return find( x, found, header->right ); }
+void RedBlackTree::print( RedBlackTree::Node* n, int depth )
+{
+	if ( n != nullNode )
+	{
+		print( n->left, depth + 1 );
+		for ( int i = 0; i < depth; i++ )
+			printf( "  " );
+		printf( "%d %s\n", n->data, n->color == BLACK ? "B" : "R" );
+		print( n->right, depth + 1 );
+	}
+}
+void RedBlackTree::print() { print( header->right, 0 ); }
+int RedBlackTree::check( RedBlackTree::Node* n )
+{
+	if ( n == nullNode )
+	{
+		return 0;
+	}
+	int lb = check( n->left ), rb = check( n->right );
+	if ( lb == -1 || rb == -1 || lb != rb )
+	{
+		return -1;
+	}
+	return lb + ( n->color == BLACK ? 1 : 0 );
+}

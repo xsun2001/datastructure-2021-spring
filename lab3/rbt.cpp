@@ -5,7 +5,7 @@
 RedBlackTree::RedBlackTree()
 	: header( new Node ), nullNode( new Node ), current( nullptr ), p1( nullptr ), p2( nullptr ), p3( nullptr )
 {
-	header->data = std::numeric_limits<int>::min();
+	header->data = 0;
 	nullNode->left = nullNode->right = header->left = header->right = nullNode;
 	setBlack( { header, header->right, nullNode } );
 }
@@ -113,7 +113,7 @@ void RedBlackTree::insert( int x )
 	current = p1 = p2 = header;
 	setData( nullNode, x );
 
-	while ( getData( current ) != x )
+	while ( getData( current ) != x || current == header )
 	{
 		p3 = p2;
 		p2 = p1;

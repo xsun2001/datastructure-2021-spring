@@ -21,15 +21,14 @@ struct Data
 bool operator==( Data& x, Data& y ) { return x.ai == y.ai && x.bi == y.bi && x.ci == y.ci; }
 
 // Quick Sort
-using Comparor = std::function<int( int, int )>;
 
-int partition( int* arr, int l, int r, const Comparor& comp )
+int partition( int* arr, int l, int r, bool ( *lt )( int, int ) )
 {
 	int p = arr[r];
 	int i = l - 1;
 	for ( int j = l; j < r; j++ )
 	{
-		if ( comp( arr[j], p ) == 1 )
+		if ( lt( arr[j], p ) == 1 )
 		{
 			++i;
 			swap( arr + i, arr + j );
@@ -39,13 +38,13 @@ int partition( int* arr, int l, int r, const Comparor& comp )
 	return i + 1;
 }
 
-void sort( int* arr, int l, int r, const Comparor& comp )
+void sort( int* arr, int l, int r, bool ( *lt )( int, int ) )
 {
 	if ( l < r )
 	{
-		int p = partition( arr, l, r, comp );
-		sort( arr, l, p - 1, comp );
-		sort( arr, p + 1, r, comp );
+		int p = partition( arr, l, r, lt );
+		sort( arr, l, p - 1, lt );
+		sort( arr, p + 1, r, lt );
 	}
 }
 
@@ -139,6 +138,9 @@ private:
 	}
 };
 
+bool compA( int x, int y ) { return compare( x, 1, 1, y, 1, 1 ) == 1; }
+bool compB( int x, int y ) { return compare( 1, x, 1, 1, y, 1 ) == 1; }
+bool compC( int x, int y ) { return compare( 1, 1, x, 1, 1, y ) == 1; }
 bool dataComp( Data& x, Data& y ) { return compare( x.av, x.bv, x.cv, y.av, y.bv, y.cv ) == 1; }
 PriorityQueue<Data> pq( dataComp );
 unsigned long dataHash( Data& x ) { return 43 * ( 43 * ( 43 * x.ai + x.bi ) + x.ci ); }
@@ -151,9 +153,9 @@ void get_kth( int n, int k, int* x, int* y, int* z )
 	{
 		a[i] = b[i] = c[i] = i;
 	}
-	sort( a, 1, n, []( int a, int b ) { return compare( a, 1, 1, b, 1, 1 ); } );
-	sort( b, 1, n, []( int a, int b ) { return compare( 1, a, 1, 1, b, 1 ); } );
-	sort( c, 1, n, []( int a, int b ) { return compare( 1, 1, a, 1, 1, b ); } );
+	sort( a, 1, n, compA );
+	sort( b, 1, n, compB );
+	sort( c, 1, n, compC );
 
 	Data ans = { 1, 1, 1, a[1], b[1], c[1] }, temp;
 	pq.push( ans );

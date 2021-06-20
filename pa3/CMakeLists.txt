@@ -7,4 +7,6 @@ target_include_directories(pa3-3-leftmostheap PUBLIC 3-provided)
 target_include_directories(pa3-3-binaryheap PUBLIC 3-provided)
 target_include_directories(pa3-3-bst PUBLIC 3-provided)
 
+add_executable(pa3-4 4.cpp)
+
 add_executable(pa3-5 5.cpp)
